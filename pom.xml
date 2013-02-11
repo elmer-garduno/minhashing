@@ -1,0 +1,54 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>mx.itam.metodos</groupId>
+	<artifactId>minhashing</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+
+	<name>Extended Configuration Description for UIMA pipelines</name>
+	<url>https://github.com/elmer-garduno/metodos-minhashing</url>
+	<issueManagement>
+		<system>github.com</system>
+		<url>https://github.com/elmer-garduno/metodos-minhashing/issues</url>
+	</issueManagement>
+	<inceptionYear>2013</inceptionYear>
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<scm>
+		<url>git@github.com:elmer-garduno/metodos-minhashing.git</url>
+		<connection>scm:git:git@github.com:elmer-garduno/metodos-minhashing.git</connection>
+		<developerConnection>scm:git:git@github.com:elmer-garduno/metodos-minhashing.git</developerConnection>
+	</scm>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-core</artifactId>
+			<version>0.20.205.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>12.0</version>
+			<type>jar</type>
+		</dependency>
+	</dependencies>
+</project>
