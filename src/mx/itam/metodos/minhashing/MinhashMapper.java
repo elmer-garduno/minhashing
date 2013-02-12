@@ -5,6 +5,7 @@
 package mx.itam.metodos.minhashing;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Random;
 
 import mx.itam.metodos.common.IntArrayWritable;
@@ -14,6 +15,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Mapper;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 
@@ -22,6 +25,8 @@ public final class MinhashMapper extends Mapper<Text, IntArrayWritable, Text, Te
   private HashFunction[] functions;
 
   private int functionsCount;
+
+  private int groups;
   
   private int[] hashValues; 
 
@@ -41,14 +46,20 @@ public final class MinhashMapper extends Mapper<Text, IntArrayWritable, Text, Te
         }
       }
     }
+    Joiner joiner = Joiner.on("-");
     for (int i = 0; i < functionsCount; i++) { 
-      ctx.write(new Text(String.valueOf(hashValues[i])), key);
+      List<String> str = Lists.newArrayList();
+      for (int j = 0; j < groups; j++) {
+        str.add(String.valueOf(hashValues[(i + j) % functionsCount]));
+      }
+      ctx.write(new Text(joiner.join(str)), key);
     }
   }
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
-    this.functionsCount = 10;
+    this.functionsCount = 100;
+    this.groups = 7;
     this.hashValues = new int[functionsCount];
     this.functions = new HashFunction[functionsCount];
     Random r = new Random(11);

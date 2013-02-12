@@ -4,6 +4,7 @@ import mx.itam.metodos.common.IntArrayWritable;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
@@ -40,7 +41,7 @@ public class HadoopShingles {
     job.setJarByClass(HadoopShingles.class);
     job.setMapperClass(ShinglesMapper.class);
     job.setMapOutputKeyClass(Text.class);
-    job.setMapOutputValueClass(Text.class);
+    job.setMapOutputValueClass(IntWritable.class);
     job.setReducerClass(ShinglesReducer.class);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(IntArrayWritable.class);

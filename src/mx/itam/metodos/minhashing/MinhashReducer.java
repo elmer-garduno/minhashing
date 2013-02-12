@@ -23,7 +23,7 @@ public class MinhashReducer extends
       Text document = new Text(x);
       cluster.add(document);
     }
-    if (cluster.size() > 50) {
+    if (cluster.size() > 2) {
       for (Text doc : cluster) {
         System.out.println(id + ":" + doc);
         ctx.write(id, doc);

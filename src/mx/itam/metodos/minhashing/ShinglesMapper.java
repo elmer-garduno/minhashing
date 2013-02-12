@@ -12,7 +12,7 @@ public final class ShinglesMapper extends Mapper<Text, Text, Text, IntWritable> 
   public void map(Text key, Text value, Context ctx) throws IOException,
           InterruptedException {
     String text = value.toString();
-    int k = 5;
+    int k = 10;
     System.out.println(key);
     IntWritable shingle = new IntWritable();
     for (int i = 0; i < text.length() - k ; i++) {
