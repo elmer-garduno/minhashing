@@ -25,7 +25,6 @@ public class MinhashReducer extends
     }
     if (cluster.size() > 2) {
       for (Text doc : cluster) {
-        System.out.println(id + ":" + doc);
         ctx.write(id, doc);
       }
     }

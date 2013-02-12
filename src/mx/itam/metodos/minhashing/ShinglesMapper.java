@@ -13,10 +13,9 @@ public final class ShinglesMapper extends Mapper<Text, Text, Text, IntWritable> 
           InterruptedException {
     String text = value.toString();
     int k = 10;
-    System.out.println(key);
     IntWritable shingle = new IntWritable();
     for (int i = 0; i < text.length() - k ; i++) {
-      shingle.set(text.substring(i, i +k).hashCode());
+      shingle.set(text.substring(i, i + k).hashCode());
       ctx.write(key, shingle);
     }
   }
