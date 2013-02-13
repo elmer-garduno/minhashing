@@ -18,13 +18,13 @@ public class MinhashReducer extends
   @Override
   public void reduce(Text id, Iterable<Text> values, Context ctx) 
     throws IOException, InterruptedException {
-    List<Text> cluster = Lists.newArrayList();
+    List<Text> documents = Lists.newArrayList();
     for (Text x : values) {
       Text document = new Text(x);
-      cluster.add(document);
+      documents.add(document);
     }
-    if (cluster.size() > 2) {
-      for (Text doc : cluster) {
+    if (documents.size() > 10) {
+      for (Text doc : documents) {
         ctx.write(id, doc);
       }
     }

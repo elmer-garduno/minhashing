@@ -15,9 +15,6 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 
 public class HadoopShingles {
-  public enum NBCounters {
-    CORRECT, COUNT;
-  }
 
   public static void main(String[] args) throws Exception {
     JobConf conf = new JobConf(HadoopShingles.class);
