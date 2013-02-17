@@ -12,12 +12,15 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 
 public class HadoopMinhashing {
+  
+  public static final String ROWS = "rows";
 
   public static void main(String[] args) throws Exception {
     JobConf conf = new JobConf(HadoopMinhashing.class);
     String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
     Path data = new Path(otherArgs[0]);
     Path out = new Path(otherArgs[1]);
+    conf.setInt(ROWS, Integer.parseInt(otherArgs[2]));
     computeMinhashes(data, out, conf);
   }
 

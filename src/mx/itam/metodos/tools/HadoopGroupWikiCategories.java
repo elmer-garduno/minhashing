@@ -18,12 +18,13 @@ public class HadoopGroupWikiCategories {
     String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
     Path data = new Path(otherArgs[0]);
     Path out = new Path(otherArgs[1]);
+    conf.setInt("k", Integer.parseInt(otherArgs[2]));
     groupCategories(data, out, conf);
   }
 
   private static void groupCategories(Path data, Path out, Configuration conf) throws Exception {
     Job job = new Job(conf, "hadoop-wiki-categories");
-
+    
     job.setJarByClass(HadoopGroupWikiCategories.class);
     job.setMapperClass(SplitMapper.class);
     job.setMapOutputKeyClass(Text.class);

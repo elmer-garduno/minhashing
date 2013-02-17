@@ -15,18 +15,20 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Mapper;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 
 public final class MinhashMapper extends Mapper<Text, IntArrayWritable, Text, Text> {
 
+  private HashFunction lsh;
+  
   private HashFunction[] functions;
 
   private int functionsCount;
 
-  private int groups;
+  private int rows;
   
   private int[] hashValues; 
 
@@ -46,25 +48,32 @@ public final class MinhashMapper extends Mapper<Text, IntArrayWritable, Text, Te
         }
       }
     }
-    Joiner joiner = Joiner.on("-");
+    Text text = new Text();
+    Hasher hasher = lsh.newHasher();
+    int band = 0;
     for (int i = 0; i < functionsCount; i++) { 
-      List<String> str = Lists.newArrayList();
-      for (int j = 0; j < groups; j++) {
-        str.add(String.valueOf(hashValues[(i + j) % functionsCount]));
+      hasher.putInt(hashValues[i]);
+      if (i > 0 && (i % rows) == 0) {
+        text.set(band + "-" +hasher.hash().toString());
+        ctx.write(text, key);
+        hasher = lsh.newHasher();
+        band++;
       }
-      ctx.write(new Text(joiner.join(str)), key);
     }
+    text.set(band + "-" +hasher.hash().toString());
+    ctx.write(text, key);
   }
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     this.functionsCount = 100;
-    this.groups = 7;
+    this.rows = context.getConfiguration().getInt(HadoopMinhashing.ROWS, 7);
     this.hashValues = new int[functionsCount];
     this.functions = new HashFunction[functionsCount];
     Random r = new Random(11);
     for (int i = 0; i < functionsCount; i++) {
       functions[i] = Hashing.murmur3_32(r.nextInt());
     }
+    this.lsh = Hashing.murmur3_32(r.nextInt());
   }
 }

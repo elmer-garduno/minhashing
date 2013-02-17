@@ -23,7 +23,7 @@ public class MinhashReducer extends
       Text document = new Text(x);
       documents.add(document);
     }
-    if (documents.size() > 10) {
+    if (documents.size() > 1) {
       for (Text doc : documents) {
         ctx.write(id, doc);
       }
