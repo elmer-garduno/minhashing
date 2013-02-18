@@ -7,12 +7,15 @@ import java.io.IOException;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.log4j.Logger;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 
 public class LSHClusterReducer extends
  Reducer<Text, Text, Text, FloatWritable> {
+
+  private final Logger logger = Logger.getLogger(LSHClusterReducer.class); 
   
   private float bands;
   
@@ -42,6 +45,7 @@ public class LSHClusterReducer extends
     int functionsCount = 100;
     int rows = context.getConfiguration().getInt(HadoopMinhashing.ROWS, 10);
     this.bands = functionsCount / rows;
-    this.threshold = context.getConfiguration().getFloat(HadoopMinhashing.THRESHOLD, 0.5F);
+    this.threshold = (float) Math.pow(1 / bands, 1 / (float) rows);
+    logger.info("Threshold:" + threshold);
   }
 }

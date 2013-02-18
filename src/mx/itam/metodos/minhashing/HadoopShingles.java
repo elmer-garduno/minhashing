@@ -21,6 +21,8 @@ public class HadoopShingles {
     String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
     Path data = new Path(otherArgs[0]);
     Path out = new Path(otherArgs[1]);
+
+    //conf.setInt("k", Integer.parseInt(otherArgs[2]));
     computeShingles(data, out, conf);
   }
 

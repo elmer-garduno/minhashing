@@ -24,12 +24,15 @@ public class HadoopMinhashing {
     String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
     Path data = new Path(otherArgs[0]);
     Path tmp = new Path("tmp" + Math.random());
-    Path out = new Path(otherArgs[1]);
-    conf.setInt(ROWS, Integer.parseInt(otherArgs[2]));
-    conf.setFloat(THRESHOLD, 0.5F);
-    computeMinhashes(data, tmp, conf);
-    computeClusters(tmp, out, conf);
-    tmp.getFileSystem(conf).deleteOnExit(tmp);
+    try {
+      Path out = new Path(otherArgs[1]);
+      conf.setInt(ROWS, Integer.parseInt(otherArgs[2]));
+      conf.setFloat(THRESHOLD, 0.5F);
+      computeMinhashes(data, tmp, conf);
+      computeClusters(tmp, out, conf);    
+    } finally {
+      tmp.getFileSystem(conf).deleteOnExit(tmp);
+    }
   }
 
   private static void computeMinhashes(Path data, Path out, Configuration conf) throws Exception {
