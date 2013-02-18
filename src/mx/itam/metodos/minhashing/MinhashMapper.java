@@ -1,6 +1,6 @@
 // This class is based on the org.apache.mahout.clustering.minhash.MinHashMapper
 // available under the Apache License 2.0
-// This version has been simplified for educational purposes
+// and on the method for LSH explained on Rajaraman, Leskovec and Ullman 2012
 
 package mx.itam.metodos.minhashing;
 
@@ -54,20 +54,24 @@ public final class MinhashMapper extends Mapper<Text, IntArrayWritable, Text, Te
     for (int i = 0; i < functionsCount; i++) { 
       hasher.putInt(hashValues[i]);
       if (i > 0 && (i % rows) == 0) {
-        text.set(band + "-" +hasher.hash().toString());
-        ctx.write(text, key);
+        text.set(band + "-" + hasher.hash().toString());
+        write(key, text, ctx);
         hasher = lsh.newHasher();
         band++;
       }
     }
-    text.set(band + "-" +hasher.hash().toString());
+    text.set(band + "-" + hasher.hash().toString());
+    write(key, text, ctx);
+  }
+  
+  private void write(Text key, Text text, Context ctx) throws IOException, InterruptedException {
     ctx.write(text, key);
   }
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     this.functionsCount = 100;
-    this.rows = context.getConfiguration().getInt(HadoopMinhashing.ROWS, 7);
+    this.rows = context.getConfiguration().getInt(HadoopMinhashing.ROWS, 10);
     this.hashValues = new int[functionsCount];
     this.functions = new HashFunction[functionsCount];
     Random r = new Random(11);

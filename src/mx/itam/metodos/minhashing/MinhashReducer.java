@@ -1,11 +1,11 @@
 package mx.itam.metodos.minhashing;
 
-//This class is based on the org.apache.mahout.clustering.minhash.MinHashMapper
-//available under the Apache License 2.0
-//This version has been simplified for educational purposes
+//This class is based on the method for LSH explained on Rajaraman, Leskovec and Ullman 2012
 
 import java.io.IOException;
 import java.util.List;
+
+import mx.itam.metodos.common.TextArrayWritable;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -13,20 +13,19 @@ import org.apache.hadoop.mapreduce.Reducer;
 import com.google.common.collect.Lists;
 
 public class MinhashReducer extends
- Reducer<Text, Text, Text, Text> {
+ Reducer<Text, Text, Text, TextArrayWritable> {
   
   @Override
   public void reduce(Text id, Iterable<Text> values, Context ctx) 
     throws IOException, InterruptedException {
     List<Text> documents = Lists.newArrayList();
     for (Text x : values) {
-      Text document = new Text(x);
-      documents.add(document);
+      documents.add(new Text(x));
     }
     if (documents.size() > 1) {
-      for (Text doc : documents) {
-        ctx.write(id, doc);
-      }
+      TextArrayWritable out = new TextArrayWritable();
+      out.set(documents.toArray(new Text[0]));
+      ctx.write(new Text(id), out);
     }
   }
 }

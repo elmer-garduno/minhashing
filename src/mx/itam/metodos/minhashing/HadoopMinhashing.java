@@ -1,7 +1,10 @@
 package mx.itam.metodos.minhashing;
 
+import mx.itam.metodos.common.TextArrayWritable;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
@@ -14,14 +17,19 @@ import org.apache.hadoop.util.GenericOptionsParser;
 public class HadoopMinhashing {
   
   public static final String ROWS = "rows";
+  public static final String THRESHOLD = "threshold";
 
   public static void main(String[] args) throws Exception {
     JobConf conf = new JobConf(HadoopMinhashing.class);
     String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
     Path data = new Path(otherArgs[0]);
+    Path tmp = new Path("tmp" + Math.random());
     Path out = new Path(otherArgs[1]);
     conf.setInt(ROWS, Integer.parseInt(otherArgs[2]));
-    computeMinhashes(data, out, conf);
+    conf.setFloat(THRESHOLD, 0.5F);
+    computeMinhashes(data, tmp, conf);
+    computeClusters(tmp, out, conf);
+    tmp.getFileSystem(conf).deleteOnExit(tmp);
   }
 
   private static void computeMinhashes(Path data, Path out, Configuration conf) throws Exception {
@@ -32,7 +40,23 @@ public class HadoopMinhashing {
     job.setMapOutputValueClass(Text.class);
     job.setReducerClass(MinhashReducer.class);
     job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(Text.class);
+    job.setOutputValueClass(TextArrayWritable.class);
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+    FileInputFormat.setInputPaths(job, data);
+    FileOutputFormat.setOutputPath(job, out);
+    job.waitForCompletion(true);
+  }
+  
+  private static void computeClusters(Path data, Path out, Configuration conf) throws Exception {
+    Job job = new Job(conf, "hadoop-minhashing");
+    job.setJarByClass(HadoopMinhashing.class);
+    job.setMapperClass(LSHClusterMapper.class);
+    job.setMapOutputKeyClass(Text.class);
+    job.setMapOutputValueClass(Text.class);
+    job.setReducerClass(LSHClusterReducer.class);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(FloatWritable.class);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     FileInputFormat.setInputPaths(job, data);
