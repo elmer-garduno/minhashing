@@ -11,7 +11,7 @@ available under the Apache License 2.0.
 
 ## Clustering Wikipedia articles from its categories
 
-We will use the top 100K rows of dbpedia article-categories dataset to test. 
+We will use the top 100K rows of dbpedia article-categories [dataset](http://wiki.dbpedia.org/Downloads38) to test. 
 
 ```
 # Create the jar
