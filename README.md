@@ -56,4 +56,4 @@ awk '{printf "%s %s\n",$1,$3}' |perl -pe 's|http://dbpedia.org/resource/||g'| \
 perl -pe 's| Category:| |g' > article_categories_en.txt
 ```
 
-Use the `article_categories_en.txt` and perform the same procedure described above.
+Use the `article_categories_en.txt` as the input and perform the same procedure described above.
