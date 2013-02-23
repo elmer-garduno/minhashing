@@ -17,7 +17,7 @@ We will use the top 100K rows of dbpedia article-categories dataset to test.
 # Create the jar
 mvn jar:jar
 
-# First unzip the dataset data/wiki-100000.zip and put it into the dfs
+# Unzip the dataset data/wiki-100000.zip and put it into the dfs
 hadoop dfs -put data/wiki-100000.txt wiki-100000.txt 
 ```
 
