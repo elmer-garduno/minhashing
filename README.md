@@ -1,7 +1,7 @@
 metodos-minhashing
 ==================
 
-MapReduce Locality Sensitive Hashing using minhashes.
+MapReduce Locality Sensitive Hashing clustering.
 
 This method is based on Broder '97 _Syntactic Clustering of the Web_.
 Plus LSH as described on Rajaraman, Leskovec and Ullman 2012
