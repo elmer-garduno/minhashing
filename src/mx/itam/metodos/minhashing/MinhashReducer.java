@@ -1,6 +1,7 @@
 package mx.itam.metodos.minhashing;
 
-//This class is based on the method for LSH explained on Rajaraman, Leskovec and Ullman 2012
+// This method is based on Broder '97 Syntactic Clustering of the Web 
+// plus LSH as described on Rajaraman, Leskovec and Ullman 2012
 
 import java.io.IOException;
 import java.util.List;

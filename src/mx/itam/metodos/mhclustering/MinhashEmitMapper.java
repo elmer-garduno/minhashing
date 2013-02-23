@@ -1,25 +1,30 @@
-package mx.itam.metodos.minhashing;
+// This class is based on the org.apache.mahout.clustering.minhash.MinHashMapper
+// available under the Apache License 2.0
+// and on the method for LSH explained on Rajaraman, Leskovec and Ullman 2012
 
-// This method is based on Broder '97 Syntactic Clustering of the Web 
-// plus LSH as described on Rajaraman, Leskovec and Ullman 2012
-// and code originally found on org.apache.mahout.clustering.minhash.MinHashMapper
-// available under the Apache License 2.0.
+package mx.itam.metodos.mhclustering;
 
 import java.io.IOException;
 import java.util.Random;
 
 import mx.itam.metodos.common.IntArrayWritable;
+import mx.itam.metodos.common.ShingleKey;
+import mx.itam.metodos.minhashing.HadoopMinhashing;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.Mapper;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.Reporter;
 
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 
-public final class MinhashMapper extends Mapper<Text, IntArrayWritable, Text, Text> {
+public final class MinhashEmitMapper extends MapReduceBase implements Mapper<Text, IntArrayWritable, ShingleKey, Text> {
 
   private HashFunction lsh;
   
@@ -32,8 +37,7 @@ public final class MinhashMapper extends Mapper<Text, IntArrayWritable, Text, Te
   private int[] hashValues; 
 
   @Override
-  public void map(Text id, IntArrayWritable values, Context ctx) throws IOException,
-          InterruptedException {
+  public void map(Text id, IntArrayWritable values, OutputCollector<ShingleKey, Text> output, Reporter reporter) throws IOException {
     for (int i = 0; i < functionsCount; i++) {
       hashValues[i] = Integer.MAX_VALUE;
     }
@@ -54,23 +58,19 @@ public final class MinhashMapper extends Mapper<Text, IntArrayWritable, Text, Te
       hasher.putInt(hashValues[i]);
       if (i > 0 && (i % rows) == 0) {
         sketch.set(band + "-" + hasher.hash().toString());
-        write(id, sketch, ctx);
+        output.collect(new ShingleKey(sketch, id), id);
         hasher = lsh.newHasher();
         band++;
       }
     }
     sketch.set(band + "-" + hasher.hash().toString());
-    write(id, sketch, ctx);
+    output.collect(new ShingleKey(sketch, id), id);
   }
   
-  private void write(Text id, Text sketck, Context ctx) throws IOException, InterruptedException {
-    ctx.write(sketck, id);
-  }
-
   @Override
-  protected void setup(Context context) throws IOException, InterruptedException {
+  public void configure(JobConf job) {
     this.functionsCount = 100;
-    this.rows = context.getConfiguration().getInt(HadoopMinhashing.ROWS, 10);
+    this.rows = job.getInt(HadoopMinhashing.ROWS, 10);
     this.hashValues = new int[functionsCount];
     this.functions = new HashFunction[functionsCount];
     Random r = new Random(11);

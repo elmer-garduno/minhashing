@@ -17,7 +17,6 @@ import org.apache.hadoop.util.GenericOptionsParser;
 public class HadoopMinhashing {
   
   public static final String ROWS = "rows";
-  public static final String THRESHOLD = "threshold";
 
   public static void main(String[] args) throws Exception {
     JobConf conf = new JobConf(HadoopMinhashing.class);
@@ -25,9 +24,9 @@ public class HadoopMinhashing {
     Path data = new Path(otherArgs[0]);
     Path tmp = new Path("tmp" + Math.random());
     try {
-      Path out = new Path(otherArgs[1]);
-      conf.setInt(ROWS, Integer.parseInt(otherArgs[2]));
-      conf.setFloat(THRESHOLD, 0.5F);
+      int rows = Integer.parseInt(otherArgs[2]);
+      conf.setInt(ROWS, rows);
+      Path out = new Path(otherArgs[1] + "-" + rows);
       computeMinhashes(data, tmp, conf);
       computeClusters(tmp, out, conf);    
     } finally {
@@ -54,10 +53,10 @@ public class HadoopMinhashing {
   private static void computeClusters(Path data, Path out, Configuration conf) throws Exception {
     Job job = new Job(conf, "hadoop-minhashing");
     job.setJarByClass(HadoopMinhashing.class);
-    job.setMapperClass(LSHClusterMapper.class);
+    job.setMapperClass(LSHSimilarityMapper.class);
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(Text.class);
-    job.setReducerClass(LSHClusterReducer.class);
+    job.setReducerClass(LSHSimilarityReducer.class);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(FloatWritable.class);
     job.setInputFormatClass(SequenceFileInputFormat.class);
