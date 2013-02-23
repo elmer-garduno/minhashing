@@ -14,11 +14,11 @@ available under the Apache License 2.0.
 We will use the top 100K rows of dbpedia article-categories dataset to test. 
 
 ```
-# First unzip the dataset data/wiki-100000.zip and put it into the dfs
-hadoop dfs -put data/wiki-100000.txt wiki-100000.txt 
-
 # Create the jar
 mvn jar:jar
+
+# First unzip the dataset data/wiki-100000.zip and put it into the dfs
+hadoop dfs -put data/wiki-100000.txt wiki-100000.txt 
 ```
 
 Concatenate each of the article categories and create a sequence file in the expected format <id, content> 
