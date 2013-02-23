@@ -11,7 +11,7 @@ available under the Apache License 2.0.
 
 ## Clustering Wikipedia articles from its categories
 
-We will use the top 100000 rows of dbpedia's article categories dataset to test. 
+We will use the top 100K rows of dbpedia article-categories dataset to test. 
 
 ```
 # First unzip the dataset data/wiki-100000.zip and put it into the dfs
@@ -28,7 +28,7 @@ in our case <article, cat(categories)>
 hadoop jar target/minhashing-1.0.0-SNAPSHOT.jar mx.itam.metodos.tools.HadoopGroupWikiCategories -libjars guava-13.0.1.jar wiki-100000.txt categories-seqfiles
 ```
 
-Create k-shingles from each article's categories, this step creates a file with the format <id, list(shingles)>
+Create k-shingles from each article categories, this step creates a file with the format <id, list(shingles)>
 
 ```
 hadoop jar target/minhashing-1.0.0-SNAPSHOT.jar mx.itam.metodos.shingles.HadoopShingles categories-seqfiles categories-shingles 5
@@ -38,6 +38,12 @@ Cluster using the method described on section 3.4.3 of [Mining of Massive Datase
 
 ```
 hadoop jar target/minhashing-1.0.0-SNAPSHOT.jar mx.itam.metodos.lshclustering.HadoopLSHClustering -libjars guava-13.0.1.jar categories-shingles categories-out 5 20
+```
+
+Verify the output clusters
+
+```
+hadoop dfs -libjars target/minhashing-1.0.0-SNAPSHOT.jar -text categories-out-5-20/part-00000 | more
 ```
 
 ## Full example with a larger dataset
