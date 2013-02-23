@@ -1,4 +1,4 @@
-package mx.itam.metodos.mhclustering;
+package mx.itam.metodos.lshclustering;
 
 //This method is based on Broder '97 Syntactic Clustering of the Web 
 //plus LSH as described on Rajaraman, Leskovec and Ullman 2012
@@ -17,29 +17,30 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityMapper;
-import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
-public class HadoopMinhashClustering extends Configured implements Tool {
-
-  public enum Counters {CLUSTER}
+public class HadoopLSHClustering extends Configured implements Tool {
   
   public static final String ROWS = "rows";
+  public static final String BANDS = "bands";
   public static final String TOP_K = "top-k";
 
+  @Override
   public int run(String[] args) throws Exception {
     Configuration conf = getConf();
-    String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
-    Path data = new Path(otherArgs[0]);
-    int rows = Integer.parseInt(otherArgs[2]);
-    Path sketches = new Path(otherArgs[1] + "-sketches-" + rows);
+    Path data = new Path(args[0]);
+    int rows = Integer.parseInt(args[2]);
+    conf.setInt(ROWS, rows);
+    int bands = Integer.parseInt(args[3]);
+    conf.setInt(BANDS, bands);
+    String suffix = String.format("%s-%s", rows, bands);
+    Path sketches = new Path(args[1] + "-sketches-" + suffix);
     sketches.getFileSystem(conf).delete(sketches, true);
-    Path clusters = new Path(otherArgs[1] + "-clusters-" + rows);
+    Path clusters = new Path(args[1] + "-clusters-" + suffix);
     clusters.getFileSystem(conf).delete(clusters, true);
     try {
-      conf.setInt(ROWS, rows);
-      Path out = new Path(otherArgs[1] + "-" + rows);
+      Path out = new Path(args[1] + "-" + suffix);
       out.getFileSystem(conf).delete(out, true);
       computeMinhashes(data, sketches, conf);
       computeClusters(sketches, clusters, conf);
@@ -52,7 +53,7 @@ public class HadoopMinhashClustering extends Configured implements Tool {
   }
 
   private static void computeMinhashes(Path data, Path out, Configuration conf) throws Exception {
-    JobConf job = new JobConf(conf, HadoopMinhashClustering.class);
+    JobConf job = new JobConf(conf, HadoopLSHClustering.class);
     job.setMapperClass(MinhashEmitMapper.class);
     job.setPartitionerClass(SecondarySortKey.KeyPartitioner.class);
     job.setOutputValueGroupingComparator(SecondarySortKey.GroupingComparator.class);
@@ -69,7 +70,7 @@ public class HadoopMinhashClustering extends Configured implements Tool {
   }
 
   private static void computeClusters(Path data, Path out, Configuration conf) throws Exception {
-    JobConf job = new JobConf(conf, HadoopMinhashClustering.class);
+    JobConf job = new JobConf(conf, HadoopLSHClustering.class);
     job.setMapperClass(IdentityMapper.class);
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(Text.class);
@@ -85,7 +86,7 @@ public class HadoopMinhashClustering extends Configured implements Tool {
   
 
   private static void groupClusters(Path data, Path out, Configuration conf) throws Exception {
-    JobConf job = new JobConf(conf, HadoopMinhashClustering.class);
+    JobConf job = new JobConf(conf, HadoopLSHClustering.class);
     job.setMapperClass(IdentityMapper.class);
     job.setPartitionerClass(SecondarySortKey.KeyPartitioner.class);
     job.setOutputValueGroupingComparator(SecondarySortKey.GroupingComparator.class);
@@ -102,7 +103,7 @@ public class HadoopMinhashClustering extends Configured implements Tool {
   }
 
   public static void main(String[] args) throws Exception {
-    int res = ToolRunner.run(new Configuration(), new HadoopMinhashClustering(), args);
+    int res = ToolRunner.run(new Configuration(), new HadoopLSHClustering(), args);
     System.exit(res);
   }
 }

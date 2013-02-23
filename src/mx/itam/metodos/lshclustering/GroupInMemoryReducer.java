@@ -1,4 +1,4 @@
-package mx.itam.metodos.mhclustering;
+package mx.itam.metodos.lshclustering;
 
 import java.io.IOException;
 import java.util.Iterator;

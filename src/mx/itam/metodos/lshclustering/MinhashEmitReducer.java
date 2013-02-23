@@ -1,4 +1,4 @@
-package mx.itam.metodos.mhclustering;
+package mx.itam.metodos.lshclustering;
 
 //This method is based on Broder '97 Syntactic Clustering of the Web 
 //plus LSH as described on Rajaraman, Leskovec and Ullman 2012

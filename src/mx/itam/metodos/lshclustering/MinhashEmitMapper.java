@@ -1,4 +1,4 @@
-package mx.itam.metodos.mhclustering;
+package mx.itam.metodos.lshclustering;
 
 //This method is based on Broder '97 Syntactic Clustering of the Web 
 //plus LSH as described on Rajaraman, Leskovec and Ullman 2012
@@ -10,7 +10,6 @@ import java.util.Random;
 
 import mx.itam.metodos.common.IntArrayWritable;
 import mx.itam.metodos.common.SecondarySortKey;
-import mx.itam.metodos.minhashing.HadoopMinhashing;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -70,8 +69,9 @@ public final class MinhashEmitMapper extends MapReduceBase implements Mapper<Tex
   
   @Override
   public void configure(JobConf job) {
-    this.functionsCount = 100;
-    this.rows = job.getInt(HadoopMinhashing.ROWS, 10);
+    int bands = job.getInt(HadoopLSHClustering.BANDS, 10);
+    this.rows = job.getInt(HadoopLSHClustering.ROWS, 10);
+    this.functionsCount= bands * rows;
     this.hashValues = new int[functionsCount];
     this.functions = new HashFunction[functionsCount];
     Random r = new Random(11);

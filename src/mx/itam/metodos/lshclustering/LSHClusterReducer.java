@@ -1,4 +1,4 @@
-package mx.itam.metodos.mhclustering;
+package mx.itam.metodos.lshclustering;
 
 //This method is based on Broder '97 Syntactic Clustering of the Web 
 //plus LSH as described on Rajaraman, Leskovec and Ullman 2012
@@ -59,8 +59,8 @@ public class LSHClusterReducer extends MapReduceBase implements
   @Override
   public void configure(JobConf job) {
     int functionsCount = 100;
-    int rows = job.getInt(HadoopMinhashClustering.ROWS, 10);
-    this.topk = job.getInt(HadoopMinhashClustering.TOP_K, 1);
+    int rows = job.getInt(HadoopLSHClustering.ROWS, 10);
+    this.topk = job.getInt(HadoopLSHClustering.TOP_K, 1);
     this.bands = functionsCount / rows;
     this.threshold = (float) Math.pow(1 / bands, 1 / (float) rows);
     logger.info(String.format("{b:%s, r:%s, t:%.4f}", bands, rows, threshold));
