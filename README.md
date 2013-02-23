@@ -20,13 +20,18 @@ We will use the top 100000 rows of dbpedia's article categories dataset to test.
 hadoop dfs -put data/wiki-100000.txt wiki-100000.txt 
 ```
 
-The following step concatenats each of the article categories into the article 
-and create a sequence file in the expected format <id, content> in this case <article, categories>
+Concatenate each of the article categories and create a sequence file in the expected format <id, content> 
+in our case <article, cat(categories)>
 
 ```
-hadoop jar minhashing-hadoop.jar mx.itam.metodos.tools.HadoopGroupWikiCategories -libjars guava-13.0.1.jar wiki-10000.txt categories-seqfiles
+hadoop jar minhashing-hadoop.jar mx.itam.metodos.tools.HadoopGroupWikiCategories -libjars guava-13.0.1.jar wiki-100000.txt categories-seqfiles
 ```
 
+Create k-shingles from each article's categories, this step creates a file with the format <id, list(shingles)>
+
+```
+hadoop jar minhashing-hadoop.jar mx.itam.metodos.shingles.HadoopShingles categories-seqfiles categories-shingles 5
+```
 
 # Full example with a larger dataset
 
