@@ -1,6 +1,7 @@
 package mx.itam.metodos.minhashing;
 
-//This class is based on the method for LSH descibed on Rajaraman, Leskovec and Ullman 2012
+// This method is based on Broder '97 Syntactic Clustering of the Web 
+// plus LSH as described on Rajaraman, Leskovec and Ullman 2012
 
 import java.io.IOException;
 
@@ -12,10 +13,10 @@ import org.apache.log4j.Logger;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 
-public class LSHClusterReducer extends
+public class LSHSimilarityReducer extends
  Reducer<Text, Text, Text, FloatWritable> {
 
-  private final Logger logger = Logger.getLogger(LSHClusterReducer.class); 
+  private final Logger logger = Logger.getLogger(LSHSimilarityReducer.class); 
   
   private float bands;
   
@@ -46,6 +47,6 @@ public class LSHClusterReducer extends
     int rows = context.getConfiguration().getInt(HadoopMinhashing.ROWS, 10);
     this.bands = functionsCount / rows;
     this.threshold = (float) Math.pow(1 / bands, 1 / (float) rows);
-    logger.info("Threshold:" + threshold);
+    logger.info(String.format("{b:%s, r:%s, t:%.4f}", bands, rows, threshold));
   }
 }

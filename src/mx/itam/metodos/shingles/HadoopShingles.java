@@ -1,4 +1,4 @@
-package mx.itam.metodos.minhashing;
+package mx.itam.metodos.shingles;
 
 import mx.itam.metodos.common.IntArrayWritable;
 

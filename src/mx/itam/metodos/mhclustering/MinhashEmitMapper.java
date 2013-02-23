@@ -1,14 +1,15 @@
-// This class is based on the org.apache.mahout.clustering.minhash.MinHashMapper
-// available under the Apache License 2.0
-// and on the method for LSH explained on Rajaraman, Leskovec and Ullman 2012
-
 package mx.itam.metodos.mhclustering;
+
+//This method is based on Broder '97 Syntactic Clustering of the Web 
+//plus LSH as described on Rajaraman, Leskovec and Ullman 2012
+//and code originally found on org.apache.mahout.clustering.minhash.MinHashMapper
+//available under the Apache License 2.0.
 
 import java.io.IOException;
 import java.util.Random;
 
 import mx.itam.metodos.common.IntArrayWritable;
-import mx.itam.metodos.common.ShingleKey;
+import mx.itam.metodos.common.SecondarySortKey;
 import mx.itam.metodos.minhashing.HadoopMinhashing;
 
 import org.apache.hadoop.io.IntWritable;
@@ -24,7 +25,7 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 
-public final class MinhashEmitMapper extends MapReduceBase implements Mapper<Text, IntArrayWritable, ShingleKey, Text> {
+public final class MinhashEmitMapper extends MapReduceBase implements Mapper<Text, IntArrayWritable, SecondarySortKey, Text> {
 
   private HashFunction lsh;
   
@@ -37,7 +38,7 @@ public final class MinhashEmitMapper extends MapReduceBase implements Mapper<Tex
   private int[] hashValues; 
 
   @Override
-  public void map(Text id, IntArrayWritable values, OutputCollector<ShingleKey, Text> output, Reporter reporter) throws IOException {
+  public void map(Text id, IntArrayWritable values, OutputCollector<SecondarySortKey, Text> output, Reporter reporter) throws IOException {
     for (int i = 0; i < functionsCount; i++) {
       hashValues[i] = Integer.MAX_VALUE;
     }
@@ -58,13 +59,13 @@ public final class MinhashEmitMapper extends MapReduceBase implements Mapper<Tex
       hasher.putInt(hashValues[i]);
       if (i > 0 && (i % rows) == 0) {
         sketch.set(band + "-" + hasher.hash().toString());
-        output.collect(new ShingleKey(sketch, id), id);
+        output.collect(new SecondarySortKey(sketch, id), id);
         hasher = lsh.newHasher();
         band++;
       }
     }
     sketch.set(band + "-" + hasher.hash().toString());
-    output.collect(new ShingleKey(sketch, id), id);
+    output.collect(new SecondarySortKey(sketch, id), id);
   }
   
   @Override

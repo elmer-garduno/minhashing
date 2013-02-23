@@ -1,11 +1,14 @@
 package mx.itam.metodos.mhclustering;
 
-//This class is based on the method for LSH descibed on Rajaraman, Leskovec and Ullman 2012
+//This method is based on Broder '97 Syntactic Clustering of the Web 
+//plus LSH as described on Rajaraman, Leskovec and Ullman 2012
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import mx.itam.metodos.common.SecondarySortKey;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
@@ -15,12 +18,11 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.log4j.Logger;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 
 public class LSHClusterReducer extends MapReduceBase implements
-        Reducer<Text, Text, Text, Text> {
+        Reducer<Text, Text, SecondarySortKey, Text> {
 
   private final Logger logger = Logger.getLogger(LSHClusterReducer.class);
 
@@ -32,41 +34,33 @@ public class LSHClusterReducer extends MapReduceBase implements
 
   @Override
   public void reduce(Text pair, Iterator<Text> sketches,
-          OutputCollector<Text, Text> collector, Reporter reporter) throws IOException {
+          OutputCollector<SecondarySortKey, Text> collector, Reporter reporter) throws IOException {
     int count = 0;
-    //List<String> all = Lists.newArrayList();
     Set<String> set = Sets.newHashSet();
     while (sketches.hasNext()) {
       Text sketch = sketches.next();
       count++;
       set.add(sketch.toString());
     }
-    List<String> top = Ordering.natural().sortedCopy(set);//.leastOf(all, topk);
-    Joiner joiner = Joiner.on(",");
+    List<String> top = Ordering.natural().leastOf(set, topk);
     float fraction = count / bands;
     if (fraction > threshold) {
-      String[] values = pair.toString().split("-");
+      String[] values = pair.toString().split("\\|");
       for (String str : top) {
-        collector.collect(new Text(str), new Text(values[0]));
-        collector.collect(new Text(str), new Text(values[1]));
+        Text key = new Text(str);
+        Text v0 = new Text(values[0]);
+        collector.collect(new SecondarySortKey(key, v0), v0);
+        Text v1 = new Text(values[1]);
+        collector.collect(new SecondarySortKey(key, v1), v1);
       }
-//      List<Text> documents = Lists.newArrayList();
-//      for (String str : top) {
-//        Text x = new Text(str);
-//        for (Text text : documents) {
-//          collector.collect(new Text(String.format("%s-%s", text, x)), pair);
-//        }
-//        documents.add(x);
-//      }
-      //collector.collect(new Text(String.format("%s->%s",pair, top)), new FloatWritable(fraction));
     }
   }
 
   @Override
   public void configure(JobConf job) {
     int functionsCount = 100;
-    this.topk = job.getInt(HadoopMinhashClustering.TOP_K, 4);
     int rows = job.getInt(HadoopMinhashClustering.ROWS, 10);
+    this.topk = job.getInt(HadoopMinhashClustering.TOP_K, 1);
     this.bands = functionsCount / rows;
     this.threshold = (float) Math.pow(1 / bands, 1 / (float) rows);
     logger.info(String.format("{b:%s, r:%s, t:%.4f}", bands, rows, threshold));

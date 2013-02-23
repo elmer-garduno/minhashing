@@ -1,4 +1,4 @@
-package mx.itam.metodos.minhashing;
+package mx.itam.metodos.shingles;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,7 +9,6 @@ import mx.itam.metodos.common.IntArrayWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
-
 
 public class ShinglesReducer extends
  Reducer<Text, IntWritable, Text, IntArrayWritable> {

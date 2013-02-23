@@ -3,7 +3,6 @@ package mx.itam.metodos.mhclustering;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.UUID;
 
 import mx.itam.metodos.common.SecondarySortKey;
 import mx.itam.metodos.common.TextArrayWritable;
@@ -19,11 +18,9 @@ import com.google.common.collect.Sets;
 public class GroupInMemoryReducer extends MapReduceBase implements
         Reducer<SecondarySortKey, Text, Text, TextArrayWritable> {
 
-
   @Override
   public void reduce(SecondarySortKey cluster, Iterator<Text> ids,
           OutputCollector<Text, TextArrayWritable> collector, Reporter reporter) throws IOException {
-    Text uuid = new Text(UUID.randomUUID().toString());
     Set<Text> clustered = Sets.newLinkedHashSet();
     while (ids.hasNext()) {
       Text str = new Text(ids.next());
@@ -31,6 +28,6 @@ public class GroupInMemoryReducer extends MapReduceBase implements
     }        
     TextArrayWritable out = new TextArrayWritable();
     out.set(clustered.toArray(new Text[0]));
-    collector.collect(uuid,out);
+    collector.collect(cluster.getKey(), out);
   }
 }

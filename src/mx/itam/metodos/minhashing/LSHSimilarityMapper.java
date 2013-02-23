@@ -1,6 +1,7 @@
 package mx.itam.metodos.minhashing;
 
-// This class is based on the method for LSH described on Rajaraman, Leskovec and Ullman 2012
+// This method is based on Broder '97 Syntactic Clustering of the Web 
+// plus LSH as described on Rajaraman, Leskovec and Ullman 2012
 
 import java.io.IOException;
 import java.util.Collections;
@@ -15,7 +16,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 
 import com.google.common.collect.Lists;
 
-public final class LSHClusterMapper extends Mapper<Text, TextArrayWritable, Text, Text> {
+public final class LSHSimilarityMapper extends Mapper<Text, TextArrayWritable, Text, Text> {
 
   @Override
   public void map(Text key, TextArrayWritable values, Context ctx) throws IOException,

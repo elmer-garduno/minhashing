@@ -6,47 +6,74 @@ import java.io.IOException;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.io.WritableComparator;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.Partitioner;
 
-public class ShingleKey implements WritableComparable<ShingleKey> {
-    private Text shingle;
-    private Text id;
+public class SecondarySortKey implements WritableComparable<SecondarySortKey> {
+    private Text key;
+    private Text value;
     
-    public ShingleKey(Text shingle, Text id) {
-      this.shingle = shingle;
-      this.id = id;
+    public SecondarySortKey(Text key, Text value) {
+      this.key = key;
+      this.value = value;
     }
 
-    public ShingleKey() {
+    public SecondarySortKey() {
       this(new Text(), new Text());
     }
 
-    public Text getShingle() {
-      return shingle;
+    public Text getKey() {
+      return key;
     }
     
-    public Text getId() {
-      return id;
+    public Text getValue() {
+      return value;
     }
     
     public void write(DataOutput out) throws IOException {
-      id.write(out);
-      shingle.write(out);
+      value.write(out);
+      key.write(out);
     }
 
     public void readFields(DataInput in) throws IOException {
-      id.readFields(in);
-      shingle.readFields(in);
+      value.readFields(in);
+      key.readFields(in);
     }
     
-    public int compareTo(ShingleKey o) {
-      int diff = shingle.compareTo(o.shingle);
+    public int compareTo(SecondarySortKey o) {
+      int diff = key.compareTo(o.key);
       if (diff != 0) {
         return diff;
       } 
-      return id.compareTo(o.id); 
+      return value.compareTo(o.value); 
     }
 
     public String toString() {
-      return shingle + ":" + id;
+      return key + ":" + value;
+    }
+
+    public static class KeyPartitioner implements Partitioner<SecondarySortKey, Text> {
+      @Override
+      public void configure(JobConf job) {
+      }
+
+      @Override
+      public int getPartition(SecondarySortKey key, Text value, int numPartitions) {
+        return Math.abs(key.getKey().hashCode() * 127) % numPartitions;
+      }
+    }
+
+    public static class GroupingComparator extends WritableComparator {
+      protected GroupingComparator() {
+        super(SecondarySortKey.class);
+      }
+
+      @Override
+      public int compare(WritableComparable w1, WritableComparable w2) {
+        SecondarySortKey sk1 = (SecondarySortKey) w1;
+        SecondarySortKey sk2 = (SecondarySortKey) w2;
+        return sk1.getKey().compareTo(sk2.getKey());
+      }
     }
   }
