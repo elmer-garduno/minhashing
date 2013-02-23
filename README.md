@@ -16,12 +16,11 @@ We will use the top 100K rows of dbpedia article-categories dataset to test.
 ```
 # Create the jar
 mvn jar:jar
-
 # Unzip the dataset data/wiki-100000.zip and put it into the dfs
 hadoop dfs -put data/wiki-100000.txt wiki-100000.txt 
 ```
 
-Concatenate each of the article categories and create a sequence file in the expected format <id, content> 
+Concatenate the categories on each article and create a sequence file in the expected format <id, content> 
 in our case <article, cat(categories)>
 
 ```
