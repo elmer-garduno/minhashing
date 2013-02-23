@@ -9,11 +9,9 @@ and partially on code originally found on org.apache.mahout.clustering.minhash.M
 available under the Apache License 2.0.
 
 
-# Example
-_Clustering Wikipedia articles using their categories_
+## Clustering Wikipedia articles from its categories
 
 We will use the top 100000 rows of dbpedia's article categories dataset to test. 
-
 
 ```
 # First unzip the dataset data/wiki-100000.zip and put it into the dfs
@@ -33,7 +31,13 @@ Create k-shingles from each article's categories, this step creates a file with 
 hadoop jar minhashing-hadoop.jar mx.itam.metodos.shingles.HadoopShingles categories-seqfiles categories-shingles 5
 ```
 
-# Full example with a larger dataset
+Cluster using the method described on section 3.4.3 of [Mining of Massive Datasets v1.2](http://infolab.stanford.edu/~ullman/mmds.html)
+
+```
+hadoop jar minhashing-hadoop.jar mx.itam.metodos.lshclustering.HadoopLSHClustering -libjars guava-13.0.1.jar categories-shingles categories-out 5
+```
+
+## Full example with a larger dataset
 
 Download the article categories form dbpedia
 
