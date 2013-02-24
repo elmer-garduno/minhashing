@@ -42,7 +42,7 @@ hadoop jar target/minhashing-1.0.0-SNAPSHOT.jar mx.itam.metodos.lshclustering.Ha
 Verify the output clusters
 
 ```
-hadoop dfs -libjars target/minhashing-1.0.0-SNAPSHOT.jar -text categories-out-5-20/part-00000 | more
+hadoop dfs -libjars target/minhashing-1.0.0-SNAPSHOT.jar -text categories-out-5-20/part-r-00000 | more
 ```
 
 ## Full example with a larger dataset
