@@ -14,17 +14,13 @@ import mx.itam.metodos.common.SecondarySortKey;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 
-public final class MinhashEmitMapper extends MapReduceBase implements Mapper<Text, IntArrayWritable, SecondarySortKey, Text> {
+public final class MinhashEmitMapper extends Mapper<Text, IntArrayWritable, SecondarySortKey, Text> {
 
   private HashFunction lsh;
   
@@ -37,7 +33,7 @@ public final class MinhashEmitMapper extends MapReduceBase implements Mapper<Tex
   private int[] hashValues; 
 
   @Override
-  public void map(Text id, IntArrayWritable values, OutputCollector<SecondarySortKey, Text> output, Reporter reporter) throws IOException {
+  public void map(Text id, IntArrayWritable values, Context context) throws IOException, InterruptedException {
     for (int i = 0; i < functionsCount; i++) {
       hashValues[i] = Integer.MAX_VALUE;
     }
@@ -58,19 +54,19 @@ public final class MinhashEmitMapper extends MapReduceBase implements Mapper<Tex
       hasher.putInt(hashValues[i]);
       if (i > 0 && (i % rows) == 0) {
         sketch.set(band + "-" + hasher.hash().toString());
-        output.collect(new SecondarySortKey(sketch, id), id);
+        context.write(new SecondarySortKey(sketch, id), id);
         hasher = lsh.newHasher();
         band++;
       }
     }
     sketch.set(band + "-" + hasher.hash().toString());
-    output.collect(new SecondarySortKey(sketch, id), id);
+    context.write(new SecondarySortKey(sketch, id), id);
   }
   
   @Override
-  public void configure(JobConf job) {
-    int bands = job.getInt(HadoopLSHClustering.BANDS, 10);
-    this.rows = job.getInt(HadoopLSHClustering.ROWS, 10);
+  public void setup(Context context) {
+    int bands = context.getConfiguration().getInt(HadoopLSHClustering.BANDS, 10);
+    this.rows = context.getConfiguration().getInt(HadoopLSHClustering.ROWS, 10);
     this.functionsCount= bands * rows;
     this.hashValues = new int[functionsCount];
     this.functions = new HashFunction[functionsCount];

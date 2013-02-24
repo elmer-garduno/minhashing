@@ -7,12 +7,11 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.SequenceFileInputFormat;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
@@ -29,7 +28,7 @@ public class HadoopShingles extends Configured implements Tool{
   }
 
   private static void computeShingles(Path data, Path out, Configuration conf) throws Exception {
-    JobConf job = new JobConf(conf, HadoopShingles.class);
+    Job job = new Job(conf, "hadoop-shingles");
     job.setJarByClass(HadoopShingles.class);
     job.setMapperClass(ShinglesMapper.class);
     job.setMapOutputKeyClass(Text.class);
@@ -37,11 +36,11 @@ public class HadoopShingles extends Configured implements Tool{
     job.setReducerClass(ShinglesReducer.class);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(IntArrayWritable.class);
-    job.setInputFormat(SequenceFileInputFormat.class);
-    job.setOutputFormat(SequenceFileOutputFormat.class);
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
     FileInputFormat.setInputPaths(job, data);
     FileOutputFormat.setOutputPath(job, out);
-    JobClient.runJob(job);
+    job.waitForCompletion(false);
   }
   
   public static void main(String[] args) throws Exception {

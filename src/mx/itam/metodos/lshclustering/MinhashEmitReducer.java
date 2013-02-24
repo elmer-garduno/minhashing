@@ -4,33 +4,28 @@ package mx.itam.metodos.lshclustering;
 //plus LSH as described on Rajaraman, Leskovec and Ullman 2012
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 
 import mx.itam.metodos.common.SecondarySortKey;
 
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 
 import com.google.common.collect.Lists;
 
-public class MinhashEmitReducer extends MapReduceBase implements Reducer <SecondarySortKey, Text, Text, Text> {
+public class MinhashEmitReducer extends Reducer <SecondarySortKey, Text, Text, Text> {
   
   @Override
-  public void reduce(SecondarySortKey key, Iterator<Text> ids, OutputCollector<Text, Text> collector,
-          Reporter reporter) throws IOException {
+  public void reduce(SecondarySortKey key, Iterable<Text> ids, Context context) throws IOException, InterruptedException {
     List<Text> documents = Lists.newArrayList();
     Text first = null;
-    while (ids.hasNext()) {
-      Text x = new Text(ids.next());
+    for (Text txt :ids) {
+      Text x = new Text(txt);
       if (first == null) {
         first = x;
       }
       for (Text text : documents) {
-        collector.collect(new Text(String.format("%s|%s", text, x)), first);
+        context.write(new Text(String.format("%s|%s", text, x)), first);
       }
       documents.add(x);
     }

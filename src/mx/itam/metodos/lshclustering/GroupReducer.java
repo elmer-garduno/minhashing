@@ -1,30 +1,24 @@
 package mx.itam.metodos.lshclustering;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import mx.itam.metodos.common.SecondarySortKey;
 
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 
-public class GroupReducer extends MapReduceBase implements
-        Reducer<SecondarySortKey, Text, Text, Text> {
+public class GroupReducer extends Reducer<SecondarySortKey, Text, Text, Text> {
 
   @Override
-  public void reduce(SecondarySortKey cluster, Iterator<Text> ids,
-          OutputCollector<Text, Text> collector, Reporter reporter) throws IOException {
+  public void reduce(SecondarySortKey cluster, Iterable<Text> ids, Context context) throws IOException, InterruptedException {
     Text label = null;
-    while (ids.hasNext()) {
-      Text str = new Text(ids.next());
+    for (Text txt : ids) {
+      Text str = new Text(txt);
       if (label != null && !label.equals(str)) {
-        collector.collect(cluster.getKey(), new Text(label));
+        context.write(cluster.getKey(), new Text(label));
       }
       label = str;
     }        
-    collector.collect(cluster.getKey(), new Text(label));
+    context.write(cluster.getKey(), new Text(label));
   }
 }

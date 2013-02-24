@@ -7,8 +7,7 @@ import java.io.IOException;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.Partitioner;
+import org.apache.hadoop.mapreduce.Partitioner;
 
 public class SecondarySortKey implements WritableComparable<SecondarySortKey> {
     private Text key;
@@ -53,11 +52,7 @@ public class SecondarySortKey implements WritableComparable<SecondarySortKey> {
       return key + ":" + value;
     }
 
-    public static class KeyPartitioner implements Partitioner<SecondarySortKey, Text> {
-      @Override
-      public void configure(JobConf job) {
-      }
-
+    public static class KeyPartitioner extends Partitioner<SecondarySortKey, Text> {
       @Override
       public int getPartition(SecondarySortKey key, Text value, int numPartitions) {
         return Math.abs(key.getKey().hashCode() * 127) % numPartitions;
@@ -66,7 +61,7 @@ public class SecondarySortKey implements WritableComparable<SecondarySortKey> {
 
     public static class GroupingComparator extends WritableComparator {
       protected GroupingComparator() {
-        super(SecondarySortKey.class);
+        super(SecondarySortKey.class, true);
       }
 
       @Override

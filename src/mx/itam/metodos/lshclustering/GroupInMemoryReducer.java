@@ -1,33 +1,27 @@
 package mx.itam.metodos.lshclustering;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Set;
 
 import mx.itam.metodos.common.SecondarySortKey;
 import mx.itam.metodos.common.TextArrayWritable;
 
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 
 import com.google.common.collect.Sets;
 
-public class GroupInMemoryReducer extends MapReduceBase implements
-        Reducer<SecondarySortKey, Text, Text, TextArrayWritable> {
+public class GroupInMemoryReducer extends Reducer<SecondarySortKey, Text, Text, TextArrayWritable> {
 
   @Override
-  public void reduce(SecondarySortKey cluster, Iterator<Text> ids,
-          OutputCollector<Text, TextArrayWritable> collector, Reporter reporter) throws IOException {
+  public void reduce(SecondarySortKey cluster, Iterable<Text> ids, Context context) throws IOException, InterruptedException {
     Set<Text> clustered = Sets.newLinkedHashSet();
-    while (ids.hasNext()) {
-      Text str = new Text(ids.next());
+    for (Text id : ids) {
+      Text str = new Text(id);
       clustered.add(str);
     }        
     TextArrayWritable out = new TextArrayWritable();
     out.set(clustered.toArray(new Text[0]));
-    collector.collect(cluster.getKey(), out);
+    context.write(cluster.getKey(), out);
   }
 }
