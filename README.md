@@ -62,3 +62,21 @@ perl -pe 's| Category:| |g' > article_categories_en.txt
 ```
 
 Use the `article_categories_en.txt` as the input file and perform the same procedure described above.
+
+### Configure EMR
+
+```
+  {
+    "access-id": "AAAAAAAAAAAAAAAAAAAA",
+    "private-key": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "region": "us-east-1",
+    "key-pair":      "keypair",
+    "key-pair-file": "/Users/user/.ssh/keypair.pem",
+    "log-uri": "s3n://bucket/logs"
+  }
+```
+
+```
+elastic-mapreduce --create --name "Group" --enable-debugging --jar s3n://metodos/minhashing-1.0.0-SNAPSHOT.jar--main-class mx.itam.metodos.tools.HadoopGroupWikiCategories --args -libjars,s3n://metodos/guava-13.0.1.jar,s3n://metodos/article_categories_en.txt,s3n://metodos/grouped_categories_en.txt --num-instances 8
+elastic-mapreduce --create --name "Shingle" --enable-debugging --jar s3n://metodos/minhashing-1.0.0-SNAPSHOT.jar --main-class mx.itam.metodos.shingles.HadoopShingles --args -libjars,s3n://metodos/guava-13.0.1.jar,s3n://metodos/grouped_categories_en.txt,s3n://metodos/wiki-shingles-10 --num-instances 8
+elastic-mapreduce --create --name "Minhash" --enable-debugging --jar s3n://metodos/minhashing-1.0.0-SNAPSHOT.jar --main-class mx.itam.metodos.lshclustering.HadoopLSHClustering --args -libjars,s3n://metodos/guava-13.0.1.jar,s3n://metodos/wiki-shingles-10,s3n://metodos/wiki-minhashed_8i --num-instances 8 --instance-type m1.large
