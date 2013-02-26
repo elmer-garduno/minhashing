@@ -63,7 +63,10 @@ perl -pe 's| Category:| |g' > article_categories_en.txt
 
 Use the `article_categories_en.txt` as the input file and perform the same procedure described above.
 
-### Configure EMR
+### Run on Elastic Map Reduce
+
+Download EMR command line tool from http://aws.amazon.com/developertools/2264
+
 
 ```
   {
