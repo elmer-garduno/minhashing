@@ -24,19 +24,22 @@ Concatenate the categories on each article and create a sequence file in the exp
 in our case <article, cat(categories)>
 
 ```
-hadoop jar target/minhashing-1.0.0-SNAPSHOT.jar mx.itam.metodos.tools.HadoopGroupWikiCategories -libjars guava-13.0.1.jar wiki-100000.txt categories-seqfiles
+hadoop jar target/minhashing-1.0.0-SNAPSHOT.jar mx.itam.metodos.tools.HadoopGroupWikiCategories \
+-libjars guava-13.0.1.jar wiki-100000.txt categories-seqfiles
 ```
 
 Create k-shingles from each article categories, this step creates a file with the format <id, list(shingles)>
 
 ```
-hadoop jar target/minhashing-1.0.0-SNAPSHOT.jar mx.itam.metodos.shingles.HadoopShingles categories-seqfiles categories-shingles 5
+hadoop jar target/minhashing-1.0.0-SNAPSHOT.jar mx.itam.metodos.shingles.HadoopShingles \
+categories-seqfiles categories-shingles 5
 ```
 
 Cluster using the method described on section 3.4.3 of [Mining of Massive Datasets v1.2](http://infolab.stanford.edu/~ullman/mmds.html)
 
 ```
-hadoop jar target/minhashing-1.0.0-SNAPSHOT.jar mx.itam.metodos.lshclustering.HadoopLSHClustering -libjars guava-13.0.1.jar categories-shingles categories-out 5 20
+hadoop jar target/minhashing-1.0.0-SNAPSHOT.jar mx.itam.metodos.lshclustering.HadoopLSHClustering \
+-libjars guava-13.0.1.jar categories-shingles categories-out 5 20
 ```
 
 Verify the output clusters
@@ -80,6 +83,16 @@ Download EMR command line tool from http://aws.amazon.com/developertools/2264
 ```
 
 ```
-elastic-mapreduce --create --name "Group" --enable-debugging --jar s3n://metodos/minhashing-1.0.0-SNAPSHOT.jar--main-class mx.itam.metodos.tools.HadoopGroupWikiCategories --args -libjars,s3n://metodos/guava-13.0.1.jar,s3n://metodos/article_categories_en.txt,s3n://metodos/grouped_categories_en.txt --num-instances 8
-elastic-mapreduce --create --name "Shingle" --enable-debugging --jar s3n://metodos/minhashing-1.0.0-SNAPSHOT.jar --main-class mx.itam.metodos.shingles.HadoopShingles --args -libjars,s3n://metodos/guava-13.0.1.jar,s3n://metodos/grouped_categories_en.txt,s3n://metodos/wiki-shingles-5,5 --num-instances 8
-elastic-mapreduce --create --name "Minhash" --enable-debugging --jar s3n://metodos/minhashing-1.0.0-SNAPSHOT.jar --main-class mx.itam.metodos.lshclustering.HadoopLSHClustering --args -libjars,s3n://metodos/guava-13.0.1.jar,s3n://metodos/wiki-shingles-5,s3n://metodos/wiki-minhashed-out,5,20 --num-instances 8 --instance-type m1.large
+elastic-mapreduce --create --name "Group" --enable-debugging --jar s3n://metodos/minhashing-1.0.0-SNAPSHOT.jar \
+--main-class mx.itam.metodos.tools.HadoopGroupWikiCategories \
+--args -libjars,s3n://metodos/guava-13.0.1.jar,s3n://metodos/article_categories_en.txt,s3n://metodos/grouped_categories_en.txt --num-instances 8
+
+elastic-mapreduce --create --name "Shingle" --enable-debugging --jar s3n://metodos/minhashing-1.0.0-SNAPSHOT.jar \
+--main-class mx.itam.metodos.shingles.HadoopShingles \
+--args -libjars,s3n://metodos/guava-13.0.1.jar,s3n://metodos/grouped_categories_en.txt,s3n://metodos/wiki-shingles-5,5 \
+--num-instances 8
+
+elastic-mapreduce --create --name "Minhash" --enable-debugging --jar s3n://metodos/minhashing-1.0.0-SNAPSHOT.jar \
+--main-class mx.itam.metodos.lshclustering.HadoopLSHClustering \
+--args -libjars,s3n://metodos/guava-13.0.1.jar,s3n://metodos/wiki-shingles-5,s3n://metodos/wiki-minhashed-out,5,20 \
+--num-instances 8 --instance-type m1.large
